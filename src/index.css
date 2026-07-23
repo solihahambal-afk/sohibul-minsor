@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary-950: #000c29;
+  --color-primary-900: #00174d; /* Deep elegant navy based on logo */
+  --color-primary-800: #002680;
+  --color-primary-700: #0031a8;
+  --color-primary-600: #003FD8; /* Brand Vibrant Blue */
+  --color-primary-500: #2962ff;
+  --color-primary-50: #f0f4ff;
+  
+  --color-gold-400: #ffaa33;
+  --color-gold-500: #FD8D03; /* Brand Orange/Gold */
+  --color-gold-600: #e07a00;
+
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+@custom-variant dark (&:where(.dark, .dark *));

@@ -1,0 +1,6 @@
+{
+  "name": "Sohibul Minsor Classic",
+  "description": "Premium travel, visa consultancy, and Hajj & Umrah services.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
