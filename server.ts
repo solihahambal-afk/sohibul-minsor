@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
+import { adminAuth } from './src/lib/firebase-admin';
 
 async function startServer() {
   const app = express();
@@ -10,14 +11,32 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', database: 'Firestore configured via Client SDK' });
+  app.get("/api/make-super-admin", async (req, res) => {
+    try {
+      const email = "solihahambal@gmail.com";
+
+      const user = await adminAuth.getUserByEmail(email);
+
+      await adminAuth.setCustomUserClaims(user.uid, {
+        role: "super_admin",
+      });
+
+      res.json({
+        success: true,
+        message: `${email} is now Super Admin`,
+      });
+    } catch (err: any) {
+      console.error(err);
+      res.status(500).json({
+        error: err.message,
+      });
+    }
   });
 
 
-// Template generator for emails
-const generateEmailTemplate = (title, contentHtml) => {
-  return `
+  // Template generator for emails
+  const generateEmailTemplate = (title, contentHtml) => {
+    return `
   <!DOCTYPE html>
   <html>
   <head>
@@ -62,22 +81,22 @@ const generateEmailTemplate = (title, contentHtml) => {
   </body>
   </html>
   `;
-};
+  };
 
   // Function Invocation Mock (Email Integration)
   app.post('/api/functions/:functionName', async (req, res) => {
     try {
       const { functionName } = req.params;
       const payload = req.body.body || req.body;
-      
+
       console.log(`Invoked edge function: ${functionName}`);
-      
+
       if (functionName === 'send-mail' || functionName === 'email-handler') {
         const bodyPayload = payload.payload || payload;
-        
+
         const type = bodyPayload.type || payload.type;
         let subject = bodyPayload.subject || 'Notification from Sohibul Minsor Classic';
-        
+
         let to = [];
         if (bodyPayload.subscribers && Array.isArray(bodyPayload.subscribers)) {
           to = bodyPayload.subscribers;
@@ -86,13 +105,13 @@ const generateEmailTemplate = (title, contentHtml) => {
         } else if (type === 'contact') {
           to = ['sohibulminsorhelpdesk@gmail.com'];
         } else {
-           to = ['sohibulminsorhelpdesk@gmail.com'];
+          to = ['sohibulminsorhelpdesk@gmail.com'];
         }
-        
+
         if (to.length === 0) {
           return res.json({ success: false, message: 'No recipients provided' });
         }
-        
+
         // Build responsive HTML based on type
         let finalHtml = '';
         if (type === 'contact') {
@@ -128,27 +147,27 @@ const generateEmailTemplate = (title, contentHtml) => {
             <center><a href="https://sohibulminsorclassic.com/news" class="btn">Read News & Updates</a></center>
           `);
         } else {
-           // Fallback to provided HTML but wrapped in template
-           finalHtml = generateEmailTemplate(subject, bodyPayload.html || '<p>You have a new notification.</p>');
+          // Fallback to provided HTML but wrapped in template
+          finalHtml = generateEmailTemplate(subject, bodyPayload.html || '<p>You have a new notification.</p>');
         }
 
-        
-        
+
+
         // Helper to send individual email
         const sendIndividualEmail = async (recipient, finalHtml) => {
           if (process.env.RESEND_API_KEY) {
-             const { Resend } = await import('resend');
-             const resend = new Resend(process.env.RESEND_API_KEY);
-             const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-             await resend.emails.send({
-               from: `Sohibul Minsor Classic <${fromEmail}>`,
-               to: recipient,
-               subject: subject,
-               html: finalHtml
-             });
-             return true;
+            const { Resend } = await import('resend');
+            const resend = new Resend(process.env.RESEND_API_KEY);
+            const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+            await resend.emails.send({
+              from: `Sohibul Minsor Classic <${fromEmail}>`,
+              to: recipient,
+              subject: subject,
+              html: finalHtml
+            });
+            return true;
           }
-          
+
           const gmailUser = process.env.GMAIL_USER || 'sohibulminsorhelpdesk@gmail.com';
           const gmailPass = process.env.GMAIL_APP_PASSWORD;
           if (gmailUser && gmailPass) {
@@ -165,7 +184,7 @@ const generateEmailTemplate = (title, contentHtml) => {
             });
             return true;
           }
-          
+
           console.log(`[MOCK] Email sent to ${recipient}`);
           return true;
         };
@@ -196,9 +215,9 @@ const generateEmailTemplate = (title, contentHtml) => {
           }
         }
 
-        return res.json({ 
-          success: true, 
-          message: `Emails processed. Successes: ${successes}, Failures: ${failures}` 
+        return res.json({
+          success: true,
+          message: `Emails processed. Successes: ${successes}, Failures: ${failures}`
         });
       }
       res.json({ success: true, message: `Function ${functionName} executed` });
