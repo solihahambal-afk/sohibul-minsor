@@ -41,9 +41,9 @@ export default function HajjUmrahPage() {
   return (
     <div className="w-full bg-white pb-24">
       {/* Page Header */}
-      <PageHero 
-        title="Hajj & Umrah Packages" 
-        subtitle="Embark on a sacred journey with peace of mind" 
+      <PageHero
+        title="Hajj & Umrah Packages"
+        subtitle="Embark on a sacred journey with peace of mind"
       />
 
       {/* Dynamic Packages Grid (If data exists) */}
@@ -52,7 +52,7 @@ export default function HajjUmrahPage() {
           <h2 className="text-3xl font-serif font-bold text-primary-900 mb-8 text-center">Available Packages</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {packages.map((pkg, idx) => (
-              <motion.div 
+              <motion.div
                 key={pkg.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -64,9 +64,9 @@ export default function HajjUmrahPage() {
                   {pkg.type}
                 </div>
                 <div className="h-48 relative">
-                  <img 
-                    src={pkg.featuredImage || 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800'} 
-                    alt={pkg.name} 
+                  <img
+                    src={pkg.featuredImage || 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800'}
+                    alt={pkg.name}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
@@ -102,7 +102,7 @@ export default function HajjUmrahPage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Umrah Package */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -120,7 +120,7 @@ export default function HajjUmrahPage() {
                   <p className="text-gray-500 mt-1">Standard & Premium Options</p>
                 </div>
               </div>
-              
+
               <p className="text-gray-600 leading-relaxed mb-8">
                 Experience the minor pilgrimage with our tailored Umrah packages. Whether you're seeking a standard trip or a luxurious stay close to the Haramain, we have you covered.
               </p>
@@ -147,7 +147,7 @@ export default function HajjUmrahPage() {
             </motion.div>
 
             {/* Hajj Package */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -157,7 +157,7 @@ export default function HajjUmrahPage() {
               <div className="absolute top-0 right-0 bg-gold-500 text-primary-900 font-bold px-4 py-2 rounded-bl-3xl rounded-tr-xl text-sm flex items-center">
                 <Calendar size={16} className="mr-2" /> Booking Open
               </div>
-              
+
               <div className="flex items-center space-x-4 mb-6">
                 <div className="bg-white/10 p-4 rounded-xl text-gold-500 border border-white/20">
                   <Moon size={32} />
@@ -167,7 +167,7 @@ export default function HajjUmrahPage() {
                   <p className="text-gray-300 mt-1">Complete Hajj Pilgrimage</p>
                 </div>
               </div>
-              
+
               <p className="text-gray-300 leading-relaxed mb-8">
                 Fulfill your sacred obligation with our comprehensive Hajj services. We ensure strict adherence to safety, comfort, and Islamic guidelines throughout your stay.
               </p>
@@ -198,29 +198,29 @@ export default function HajjUmrahPage() {
 
       {/* Gallery Section */}
       <section className="bg-gray-50 py-20 border-t border-gray-100">
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-           <h2 className="text-3xl font-serif font-bold text-primary-900 mb-12">Sacred Destinations</h2>
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <div className="relative group overflow-hidden rounded-2xl h-80">
-               <img src="https://images.unsplash.com/photo-1565552643952-b4b159f81156?auto=format&fit=crop&q=80&w=1200" alt="Kaaba, Makkah" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6">
-                 <div>
-                   <h3 className="text-2xl font-bold text-white mb-1">Makkah</h3>
-                   <p className="text-gray-300">The Holy City</p>
-                 </div>
-               </div>
-             </div>
-             <div className="relative group overflow-hidden rounded-2xl h-80">
-               <img src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=1200" alt="Masjid an-Nabawi, Madinah" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6">
-                 <div>
-                   <h3 className="text-2xl font-bold text-white mb-1">Madinah</h3>
-                   <p className="text-gray-300">The Radiant City</p>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-serif font-bold text-primary-900 mb-12">Sacred Destinations</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="relative group overflow-hidden rounded-2xl h-80">
+              <img src="/kaaba-makkah.jpg" alt="Kaaba, Makkah" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Makkah</h3>
+                  <p className="text-gray-300">The Holy City</p>
+                </div>
+              </div>
+            </div>
+            <div className="relative group overflow-hidden rounded-2xl h-80">
+              <img src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=1200" alt="Masjid an-Nabawi, Madinah" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Madinah</h3>
+                  <p className="text-gray-300">The Radiant City</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );
