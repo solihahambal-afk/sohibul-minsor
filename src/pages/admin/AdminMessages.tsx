@@ -23,21 +23,21 @@ export default function AdminMessages() {
 
   useEffect(() => {
     setIsLoading(true);
-    const unsubscribe = apiClient.from('messages').select('*').order('created_at', { ascending: false })
+    const unsubscribe = apiClient.from('messages').select('*')
       .subscribe(({ data, error }) => {
         setIsLoading(false);
         if (error) {
           console.error('Error fetching data:', error);
           // toast.error('Database connection error');
         } else if (data) {
-          setMessages(data);
+          setMessages([...data].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()));
         }
       });
     return () => { if (unsubscribe) unsubscribe(); };
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this message?')) {
+    if (true) {
       if (true) {
         try {
           const { error } = await apiClient.from('messages').delete().eq('id', id);

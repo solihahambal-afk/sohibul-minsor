@@ -33,21 +33,28 @@ export default function AdminHajjUmrah() {
 
   useEffect(() => {
     setIsLoading(true);
-    const unsubscribe = apiClient.from('hajj_umrah_packages').select('*').order('departureDate', { ascending: true })
+    const unsubscribe = apiClient.from('hajj_umrah_packages').select('*')
       .subscribe(({ data, error }) => {
         setIsLoading(false);
         if (error) {
           console.error('Error fetching data:', error);
           // toast.error('Database connection error');
         } else if (data) {
-          setPackages(data);
+          setPackages([...data].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()));
         }
       });
     return () => { if (unsubscribe) unsubscribe(); };
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this package?')) {
+    if (true) {
+      const packageToDelete = packages.find(p => p.id === id);
+      if (packageToDelete?.featuredImage) {
+        try {
+          const { deleteImage } = await import('../../lib/firebase');
+          await deleteImage(packageToDelete.featuredImage);
+        } catch (err) { console.error('Failed to delete image', err); }
+      }
       if (true) {
         try {
           const { error } = await apiClient.from('hajj_umrah_packages').delete().eq('id', id);

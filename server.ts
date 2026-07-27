@@ -2,41 +2,23 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
-import { adminAuth } from './src/lib/firebase-admin';
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
   app.use(cors());
-  app.use(express.json());
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-  app.get("/api/make-super-admin", async (req, res) => {
-    try {
-      const email = "solihahambal@gmail.com";
-
-      const user = await adminAuth.getUserByEmail(email);
-
-      await adminAuth.setCustomUserClaims(user.uid, {
-        role: "super_admin",
-      });
-
-      res.json({
-        success: true,
-        message: `${email} is now Super Admin`,
-      });
-    } catch (err: any) {
-      console.error(err);
-      res.status(500).json({
-        error: err.message,
-      });
-    }
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', database: 'Firestore configured via Client SDK' });
   });
 
 
-  // Template generator for emails
-  const generateEmailTemplate = (title, contentHtml) => {
-    return `
+// Template generator for emails
+const generateEmailTemplate = (title, contentHtml) => {
+  return `
   <!DOCTYPE html>
   <html>
   <head>
@@ -71,8 +53,8 @@ async function startServer() {
       </div>
       <div class="footer">
         <p>&copy; ${new Date().getFullYear()} Sohibul Minsor Classic Ltd. All rights reserved.</p>
-        <p>123 Business Avenue, Suite 100, City, Country</p>
-        <p><a href="https://sohibulminsorclassic.com">www.sohibulminsorclassic.com</a> | <a href="mailto:contact@sohibulminsorclassic.com">contact@sohibulminsorclassic.com</a></p>
+        <p>Shop B3, Emirate Plaza, Opposite Abanik Filling Station, Saw Mill Area, Ilorin, Kwara State, Nigeria.</p>
+        <p><a href="https://sohibulminsorclassic.com">www.sohibulminsorclassic.com</a> | <a href="mailto:info@sohibulminsorclassic.com">info@sohibulminsorclassic.com</a></p>
         <p style="margin-top: 15px; font-size: 12px;">
           <a href="https://sohibulminsorclassic.com/unsubscribe" style="color: #94a3b8; text-decoration: underline;">Unsubscribe from our newsletter</a>
         </p>
@@ -81,37 +63,37 @@ async function startServer() {
   </body>
   </html>
   `;
-  };
+};
 
   // Function Invocation Mock (Email Integration)
   app.post('/api/functions/:functionName', async (req, res) => {
     try {
       const { functionName } = req.params;
       const payload = req.body.body || req.body;
-
+      
       console.log(`Invoked edge function: ${functionName}`);
-
+      
       if (functionName === 'send-mail' || functionName === 'email-handler') {
         const bodyPayload = payload.payload || payload;
-
+        
         const type = bodyPayload.type || payload.type;
         let subject = bodyPayload.subject || 'Notification from Sohibul Minsor Classic';
-
+        
         let to = [];
         if (bodyPayload.subscribers && Array.isArray(bodyPayload.subscribers)) {
           to = bodyPayload.subscribers;
         } else if (bodyPayload.email) {
           to = [bodyPayload.email];
         } else if (type === 'contact') {
-          to = ['sohibulminsorhelpdesk@gmail.com'];
+          to = ['info@sohibulminsorclassic.com'];
         } else {
-          to = ['sohibulminsorhelpdesk@gmail.com'];
+           to = ['info@sohibulminsorclassic.com'];
         }
-
+        
         if (to.length === 0) {
           return res.json({ success: false, message: 'No recipients provided' });
         }
-
+        
         // Build responsive HTML based on type
         let finalHtml = '';
         if (type === 'contact') {
@@ -141,34 +123,36 @@ async function startServer() {
         } else if (type === 'newsletter') {
           subject = bodyPayload.subject || 'Latest Updates from Sohibul Minsor Classic';
           finalHtml = generateEmailTemplate(subject, `
-            <h1>${bodyPayload.title || bodyPayload.subject || 'New Update'}</h1>
+            <h1 class="title">${bodyPayload.title || bodyPayload.subject || 'New Update'}</h1>
             ${bodyPayload.image ? `<img src="${bodyPayload.image}" class="img-featured" alt="Featured Image" />` : ''}
-            <div>${bodyPayload.html || bodyPayload.content || ''}</div>
-            <center><a href="https://sohibulminsorclassic.com/news" class="btn">Read News & Updates</a></center>
+            <div class="summary">${bodyPayload.content || ''}</div>
+            <div class="btn-container">
+              <a href="https://sohibulminsorclassic.com/news" class="btn">Read More</a>
+            </div>
           `);
         } else {
-          // Fallback to provided HTML but wrapped in template
-          finalHtml = generateEmailTemplate(subject, bodyPayload.html || '<p>You have a new notification.</p>');
+           // Fallback to provided HTML but wrapped in template
+           finalHtml = generateEmailTemplate(subject, bodyPayload.html || '<p>You have a new notification.</p>');
         }
 
-
-
+        
+        
         // Helper to send individual email
         const sendIndividualEmail = async (recipient, finalHtml) => {
           if (process.env.RESEND_API_KEY) {
-            const { Resend } = await import('resend');
-            const resend = new Resend(process.env.RESEND_API_KEY);
-            const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-            await resend.emails.send({
-              from: `Sohibul Minsor Classic <${fromEmail}>`,
-              to: recipient,
-              subject: subject,
-              html: finalHtml
-            });
-            return true;
+             const { Resend } = await import('resend');
+             const resend = new Resend(process.env.RESEND_API_KEY);
+             const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+             await resend.emails.send({
+               from: `Sohibul Minsor Classic <${fromEmail}>`,
+               to: recipient,
+               subject: subject,
+               html: finalHtml
+             });
+             return true;
           }
-
-          const gmailUser = process.env.GMAIL_USER || 'sohibulminsorhelpdesk@gmail.com';
+          
+          const gmailUser = process.env.GMAIL_USER || 'info@sohibulminsorclassic.com';
           const gmailPass = process.env.GMAIL_APP_PASSWORD;
           if (gmailUser && gmailPass) {
             const nodemailer = (await import('nodemailer')).default;
@@ -184,48 +168,83 @@ async function startServer() {
             });
             return true;
           }
-
+          
           console.log(`[MOCK] Email sent to ${recipient}`);
           return true;
         };
 
         let successes = 0;
         let failures = 0;
-
-        // Process sequentially to not overload SMTP
-        for (const recipient of to) {
-          try {
-            // Personalize email if needed, or just send
-            await sendIndividualEmail(recipient, finalHtml);
-            console.log(`Successfully sent email to ${recipient}`);
-            successes++;
-          } catch (err) {
-            console.error(`Failed to send email to ${recipient}:`, err);
-            failures++;
+        
+        try {
+          if (process.env.RESEND_API_KEY) {
+             const { Resend } = await import('resend');
+             const resend = new Resend(process.env.RESEND_API_KEY);
+             const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+             
+             const chunkSize = 50;
+             for (let i = 0; i < to.length; i += chunkSize) {
+               const chunk = to.slice(i, i + chunkSize);
+               await resend.emails.send({
+                 from: `Sohibul Minsor Classic <${fromEmail}>`,
+                 to: fromEmail,
+                 bcc: chunk,
+                 subject: subject,
+                 html: finalHtml
+               });
+               successes += chunk.length;
+             }
+          } else {
+            const gmailUser = process.env.GMAIL_USER || 'info@sohibulminsorclassic.com';
+            const gmailPass = process.env.GMAIL_APP_PASSWORD;
+            
+            if (gmailUser && gmailPass) {
+              const nodemailer = (await import('nodemailer')).default;
+              const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: { user: gmailUser, pass: gmailPass }
+              });
+              
+              await transporter.sendMail({
+                from: `"Sohibul Minsor Classic" <${gmailUser}>`,
+                to: gmailUser,
+                bcc: to,
+                subject: subject,
+                html: finalHtml
+              });
+              successes = to.length;
+            } else {
+              console.log(`[MOCK] Bulk email sent to ${to.length} recipients via bcc`);
+              successes = to.length;
+            }
           }
+        } catch (err) {
+          console.error('Failed bulk email send:', err);
+          failures = to.length;
         }
 
-        // Also send admin copy if newsletter
-        if (type === 'newsletter' && !to.includes('sohibulminsorhelpdesk@gmail.com')) {
-          try {
-            await sendIndividualEmail('sohibulminsorhelpdesk@gmail.com', finalHtml);
-            console.log('Successfully sent admin copy');
-          } catch (err) {
-            console.error('Failed to send admin copy:', err);
-          }
-        }
-
-        return res.json({
-          success: true,
+        return res.json({ 
+          success: true, 
           message: `Emails processed. Successes: ${successes}, Failures: ${failures}`
         });
       }
+
       res.json({ success: true, message: `Function ${functionName} executed` });
 
     } catch (error: any) {
       console.error('Function error:', error);
       res.status(500).json({ error: error.message });
     }
+  });
+
+
+  // Global error handler for API routes
+  app.use('/api', (err, req, res, next) => {
+    console.error('API Error:', err);
+    res.status(err.status || 500).json({
+      success: false,
+      error: err.message || 'Internal Server Error'
+    });
   });
 
   // Vite middleware for development

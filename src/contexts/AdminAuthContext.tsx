@@ -12,6 +12,7 @@ export interface AdminUser {
   role: Role;
   lastLogin: string;
   avatarUrl?: string;
+  phone?: string;
 }
 
 interface AdminAuthContextType {
@@ -38,7 +39,8 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
           name: profile.name || profile.full_name || firebaseUser.email?.split('@')[0] || 'Admin User',
           role: profile.role || 'Admin',
           lastLogin: firebaseUser.metadata.lastSignInTime || new Date().toISOString(),
-          avatarUrl: profile.avatarUrl || profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
+          avatarUrl: profile.avatarUrl || profile.avatar_url || '',
+          phone: profile.phone || '',
         };
         setUser(adminUser);
       } else {
@@ -55,7 +57,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
           name: firebaseUser.email?.split('@')[0] || 'Admin User',
           role: 'Admin',
           lastLogin: firebaseUser.metadata.lastSignInTime || new Date().toISOString(),
-          avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
+          avatarUrl: `/new_logo.png`,
         });
       }
     } catch (error) {
@@ -66,7 +68,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         name: firebaseUser.email?.split('@')[0] || 'Admin User',
         role: 'Admin',
         lastLogin: firebaseUser.metadata.lastSignInTime || new Date().toISOString(),
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
+        avatarUrl: `/new_logo.png`,
       };
       setUser(adminUser);
     }

@@ -12,7 +12,7 @@ export async function sendNewsletterIfPublished(
   const isNowPublished = publishedStatuses.includes(newStatus);
   const wasPublished = oldStatus ? publishedStatuses.includes(oldStatus) : false;
 
-  if (isNowPublished && !wasPublished) {
+  if (isNowPublished) {
     try {
       const { data: subs, error: subsError } = await apiClient
         .from('subscribers')

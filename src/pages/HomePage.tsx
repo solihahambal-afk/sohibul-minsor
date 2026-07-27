@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Star, CheckCircle, Quote, MapPin, Search, Mail } from 'lucide-react';
+import { ArrowRight, Star, CheckCircle, Quote, MapPin, Search, Mail, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../lib/apiClient';
 
@@ -38,11 +38,9 @@ export default function HomePage() {
         const { data, error } = await apiClient
           .from('testimonials')
           .select('*')
-          .eq('isPublished', true)
-          .order('created_at', { ascending: false })
-          .limit(3);
+          .eq('isPublished', true);
         if (!error && data && data.length > 0) {
-          setTestimonials(data);
+          setTestimonials([...data].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()).slice(0, 3));
         }
       } catch (err) {
         console.error(err);
@@ -328,28 +326,28 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-center items-center gap-6 mb-12">
             <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg flex items-center space-x-3 border border-white/50 transform hover:-translate-y-1 transition-transform">
               <div className="bg-primary-100 p-2 rounded-full text-primary-700">
+                <Phone size={20} />
+              </div>
+              <a href="tel:+2348074414734" className="text-primary-900 font-semibold hover:text-primary-700 transition-colors">
+                +234 807 441 4734
+              </a>
+            </div>
+            
+            <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg flex items-center space-x-3 border border-white/50 transform hover:-translate-y-1 transition-transform">
+              <div className="bg-primary-100 p-2 rounded-full text-primary-700">
+                <MapPin size={20} />
+              </div>
+              <span className="text-primary-900 font-semibold hover:text-primary-700 transition-colors text-left max-w-xs text-sm">
+                Shop B3, Emirate Plaza, Saw Mill Area, Ilorin, Kwara State
+              </span>
+            </div>
+            
+            <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg flex items-center space-x-3 border border-white/50 transform hover:-translate-y-1 transition-transform">
+              <div className="bg-primary-100 p-2 rounded-full text-primary-700">
                 <Mail size={20} />
               </div>
               <a href="mailto:info@sohibulminsorclassic.com" className="text-primary-900 font-semibold hover:text-primary-700 transition-colors">
                 info@sohibulminsorclassic.com
-              </a>
-            </div>
-            
-            <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg flex items-center space-x-3 border border-white/50 transform hover:-translate-y-1 transition-transform">
-              <div className="bg-primary-100 p-2 rounded-full text-primary-700">
-                <Mail size={20} />
-              </div>
-              <a href="mailto:admin@sohibulminsorclassic.com" className="text-primary-900 font-semibold hover:text-primary-700 transition-colors">
-                admin@sohibulminsorclassic.com
-              </a>
-            </div>
-            
-            <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg flex items-center space-x-3 border border-white/50 transform hover:-translate-y-1 transition-transform">
-              <div className="bg-primary-100 p-2 rounded-full text-primary-700">
-                <Mail size={20} />
-              </div>
-              <a href="mailto:support@sohibulminsorclassic.com" className="text-primary-900 font-semibold hover:text-primary-700 transition-colors">
-                support@sohibulminsorclassic.com
               </a>
             </div>
           </div>

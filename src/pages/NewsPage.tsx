@@ -41,7 +41,7 @@ export default function NewsPage() {
     document.title = "News & Updates | Sohibul Minsor Classic Ltd";
     setIsLoading(true);
 
-    const unsubNews = apiClient.from('news').select('*').eq('status', 'Published').order('datePublished', { ascending: false }).subscribe(({ data }) => setRealNews(data || []));
+    const unsubNews = apiClient.from('news').select('*').eq('status', 'Published').subscribe(({ data }) => setRealNews(data ? [...data].sort((a, b) => new Date(b.datePublished || 0).getTime() - new Date(a.datePublished || 0).getTime()) : []));
     const unsubServices = apiClient.from('services').select('*').eq('status', 'Active').subscribe(({ data }) => setRealServices(data || []));
     const unsubScholarships = apiClient.from('scholarships').select('*').eq('status', 'Open').subscribe(({ data }) => setRealScholarships(data || []));
     const unsubHajj = apiClient.from('hajj_umrah_packages').select('*').eq('status', 'Open').subscribe(({ data }) => setRealHajj(data || []));
@@ -69,7 +69,7 @@ export default function NewsPage() {
         category: 'Services',
         datePublished: s.created_at || new Date().toISOString(),
         author: 'Admin',
-        featuredImage: s.image || 'https://images.unsplash.com/photo-1542314831-c6a4d14fe6a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
+        featuredImage: s.iconImage || s.featuredImage || 'https://images.unsplash.com/photo-1542314831-c6a4d14fe6a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
         status: 'Published'
       });
     });
@@ -84,7 +84,7 @@ export default function NewsPage() {
         category: 'Scholarships',
         datePublished: s.created_at || new Date().toISOString(),
         author: 'Admin',
-        featuredImage: s.image || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
+        featuredImage: s.iconImage || s.featuredImage || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
         status: 'Published'
       });
     });
@@ -99,7 +99,7 @@ export default function NewsPage() {
         category: 'Hajj & Umrah',
         datePublished: h.created_at || new Date().toISOString(),
         author: 'Admin',
-        featuredImage: h.image || 'https://images.unsplash.com/photo-1565552643952-25064c5d5e23?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
+        featuredImage: h.featuredImage || 'https://images.unsplash.com/photo-1565552643952-25064c5d5e23?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
         status: 'Published'
       });
     });
@@ -280,7 +280,13 @@ export default function NewsPage() {
             )}
 
             {/* News Grid */}
-            {currentNews.length > 0 ? (
+            {currentNews.length === 0 && !isLoading ? (
+              <div className="col-span-full py-20 text-center bg-white rounded-2xl border border-gray-100">
+                <div className="text-gray-400 mb-4 flex justify-center"><Search size={48} /></div>
+                <h3 className="text-xl font-bold text-primary-900 mb-2">No updates found</h3>
+                <p className="text-gray-500">We couldn't find any news matching your criteria.</p>
+              </div>
+            ) : currentNews.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence mode="popLayout">
                   {currentNews.map((post, index) => (
@@ -449,17 +455,25 @@ export default function NewsPage() {
             <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto" onSubmit={async (e) => {
               e.preventDefault();
               if (!email) return;
-              
               setIsSubscribing(true);
               try {
+                const emailToSubscribe = email;
+                
+                const { data: existingSubscribers } = await apiClient.from('subscribers').select('email').eq('email', emailToSubscribe).limit(1);
+                
+                if (existingSubscribers && existingSubscribers.length > 0) {
+                  toast.error('Thank you, you have subscribed before');
+                  setIsSubscribing(false);
+                  return;
+                }
 
                 const { error } = await apiClient.from('subscribers').insert([
-                  { email, status: 'Active' }
+                  { email: emailToSubscribe, status: 'Active' }
                 ]);
                 
                 if (error) {
                   if (error.code === '23505' || error.message?.includes('unique') || error.message?.includes('duplicate')) {
-                    toast.error('This email is already subscribed.');
+                    toast.error('Thank you, you have subscribed before');
                     setIsSubscribing(false);
                     return;
                   }
@@ -467,19 +481,14 @@ export default function NewsPage() {
                 }
                 
                 try {
-                  // Run in background without awaiting, or await it but don't show email-specific toasts
                   apiClient.functions.invoke("send-mail", {
-                    body: {
-                      type: "welcome",
-                      payload: { email }
-                    }
+                    body: { type: "welcome", payload: { email } }
                   }).catch(emailErr => {
                     console.error('Welcome email error:', emailErr);
                   });
                   
                   toast.success('Subscription successful.');
                 } catch (err) {
-                  // In case synchronous error happens
                   toast.success('Subscription successful.');
                 }
                 

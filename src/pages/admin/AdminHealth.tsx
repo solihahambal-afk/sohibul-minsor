@@ -113,7 +113,7 @@ export default function AdminHealth() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Object.values(services).map((service, index) => {
+        {Object.values(services).map((service: any, index) => {
           const Icon = service.icon;
           return (
             <div key={index} className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">

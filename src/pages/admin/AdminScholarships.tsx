@@ -33,21 +33,28 @@ export default function AdminScholarships() {
 
   useEffect(() => {
     setIsLoading(true);
-    const unsubscribe = apiClient.from('scholarships').select('*').order('deadline', { ascending: true })
+    const unsubscribe = apiClient.from('scholarships').select('*')
       .subscribe(({ data, error }) => {
         setIsLoading(false);
         if (error) {
           console.error('Error fetching data:', error);
           // toast.error('Database connection error');
         } else if (data) {
-          setItems(data);
+          setItems([...data].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()));
         }
       });
     return () => { if (unsubscribe) unsubscribe(); };
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this scholarship?')) {
+    if (true) {
+      const itemToDelete = items.find(i => i.id === id);
+      if (itemToDelete?.featuredImage) {
+        try {
+          const { deleteImage } = await import('../../lib/firebase');
+          await deleteImage(itemToDelete.featuredImage);
+        } catch (err) { console.error('Failed to delete image', err); }
+      }
       if (true) {
         try {
           const { error } = await apiClient.from('scholarships').delete().eq('id', id);

@@ -29,26 +29,26 @@ export default function AdminTestimonials() {
 
   useEffect(() => {
     setIsLoading(true);
-    const unsubscribe = apiClient.from('testimonials').select('*').order('created_at', { ascending: false })
+    const unsubscribe = apiClient.from('testimonials').select('*')
       .subscribe(({ data, error }) => {
         setIsLoading(false);
         if (error) {
           console.error('Error fetching data:', error);
           // toast.error('Database connection error');
         } else if (data) {
-          setTestimonials(data);
+          setItems([...data].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()));
         }
       });
     return () => { if (unsubscribe) unsubscribe(); };
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this testimonial?')) return;
+    if (false) return;
     try {
       const { error } = await apiClient.from('testimonials').delete().eq('id', id);
       if (error) throw error;
       toast.success('Testimonial deleted successfully');
-      fetchTestimonials();
+      // noop since we subscribe();
     } catch (err: any) {
       toast.error('Failed to delete testimonial');
     }
@@ -59,7 +59,7 @@ export default function AdminTestimonials() {
       const { error } = await apiClient.from('testimonials').update({ isPublished: !currentStatus }).eq('id', id);
       if (error) throw error;
       toast.success(currentStatus ? 'Testimonial unpublished' : 'Testimonial published');
-      fetchTestimonials();
+      // noop since we subscribe();
     } catch (err: any) {
       toast.error('Failed to update status');
     }
@@ -95,7 +95,7 @@ export default function AdminTestimonials() {
       setView('list');
       setEditingItem(null);
       setFormData({ rating: '5', isPublished: true });
-      fetchTestimonials();
+      // noop since we subscribe();
     } catch (err: any) {
       toast.error('Failed to save testimonial');
       console.error(err);

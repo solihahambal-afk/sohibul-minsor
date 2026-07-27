@@ -101,7 +101,7 @@ export default function AdminLayout() {
             </button>
             <div className="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center text-primary-700 dark:text-primary-300 font-bold ml-2 overflow-hidden border border-gray-200 dark:border-gray-700">
               {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-contain p-1 bg-white" />
               ) : (
                 <User size={18} />
               )}

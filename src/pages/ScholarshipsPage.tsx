@@ -26,13 +26,14 @@ export default function ScholarshipsPage() {
 
   useEffect(() => {
     setIsLoading(true);
-    const unsubscribe = apiClient.from('scholarships').select('*').eq('status', 'Open').order('deadline', { ascending: true })
+    const unsubscribe = apiClient.from('scholarships').select('*').eq('status', 'Open')
       .subscribe(({ data, error }) => {
         setIsLoading(false);
         if (error) {
           console.error('Error fetching data:', error);
         } else if (data) {
-          setScholarships(data);
+          const sortedData = [...data].sort((a, b) => new Date(a.deadline || 0).getTime() - new Date(b.deadline || 0).getTime());
+          setScholarships(sortedData);
         }
       });
     return () => { if (unsubscribe) unsubscribe(); };

@@ -29,21 +29,28 @@ export default function AdminServices() {
 
   useEffect(() => {
     setIsLoading(true);
-    const unsubscribe = apiClient.from('services').select('*').order('displayOrder', { ascending: true })
+    const unsubscribe = apiClient.from('services').select('*')
       .subscribe(({ data, error }) => {
         setIsLoading(false);
         if (error) {
           console.error('Error fetching data:', error);
           // toast.error('Database connection error');
         } else if (data) {
-          setServices(data);
+          setServices([...data].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()));
         }
       });
     return () => { if (unsubscribe) unsubscribe(); };
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this service?')) {
+    if (true) {
+      const serviceToDelete = services.find(s => s.id === id);
+      if (serviceToDelete?.iconImage) {
+        try {
+          const { deleteImage } = await import('../../lib/firebase');
+          await deleteImage(serviceToDelete.iconImage);
+        } catch (err) { console.error('Failed to delete image', err); }
+      }
       if (true) {
         try {
           const { error } = await apiClient.from('services').delete().eq('id', id);

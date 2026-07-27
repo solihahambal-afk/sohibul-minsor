@@ -13,6 +13,7 @@ export default function AdminProfile() {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
+    phone: user?.phone || '',
     avatarUrl: user?.avatarUrl || '',
     currentPassword: '',
     newPassword: '',
@@ -25,6 +26,7 @@ export default function AdminProfile() {
         ...prev,
         name: user.name || '',
         email: user.email || '',
+        phone: user.phone || '',
         avatarUrl: user.avatarUrl || ''
       }));
     }
@@ -34,6 +36,15 @@ export default function AdminProfile() {
     e.preventDefault();
     if (!auth.currentUser) return;
     
+    if (!formData.name.trim()) {
+      toast.error('Name is required');
+      return;
+    }
+    if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email)) {
+      toast.error('Valid email is required');
+      return;
+    }
+    
     try {
       if (formData.email !== auth.currentUser.email) {
         await updateEmail(auth.currentUser, formData.email);
@@ -42,7 +53,8 @@ export default function AdminProfile() {
       const { error } = await apiClient.from('users').update({
         full_name: formData.name,
         avatar_url: formData.avatarUrl,
-        email: formData.email
+        email: formData.email,
+        phone: formData.phone
       }).eq('uid', auth.currentUser.uid).select().single();
 
       if (error) throw error;
@@ -57,6 +69,11 @@ export default function AdminProfile() {
   const handleSavePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth.currentUser) return;
+    
+    if (formData.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
 
     if (formData.newPassword !== formData.confirmPassword) {
       toast.error('New passwords do not match');
@@ -92,44 +109,31 @@ export default function AdminProfile() {
     const file = e.target.files?.[0];
     if (!file) return;
     
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Invalid file type. Please upload a JPG, PNG, or WEBP image.');
+      if (e.target) e.target.value = '';
+      return;
+    }
+    
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image is too large. Max 5MB allowed.');
+      if (e.target) e.target.value = '';
       return;
     }
 
     const toastId = toast.loading('Uploading profile picture...');
     try {
-      const { uploadImage } = await import('../../lib/firebase');
-      
-      // Compress
-      const compress = (f: File): Promise<File> => new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(f);
-        reader.onload = (event) => {
-          const img = new Image();
-          img.src = event.target?.result as string;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let w = img.width, h = img.height;
-            if (w > h && w > 500) { h *= 500 / w; w = 500; }
-            else if (h > 500) { w *= 500 / h; h = 500; }
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx?.drawImage(img, 0, 0, w, h);
-            canvas.toBlob(blob => {
-              resolve(blob ? new File([blob], f.name, { type: f.type }) : f);
-            }, f.type || 'image/jpeg', 0.85);
-          };
-        };
-      });
-      
-      const compressed = await compress(file);
+      const { uploadImage, compressImage } = await import('../../lib/firebase');
+      const compressed = await compressImage(file);
       const url = await uploadImage(compressed, 'avatars');
       
       setFormData({ ...formData, avatarUrl: url });
       toast.success('Profile picture loaded. Click Save Changes to apply.', { id: toastId });
-    } catch (err) {
-      toast.error('Failed to upload image.', { id: toastId });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to upload image.', { id: toastId });
+    } finally {
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -147,9 +151,9 @@ export default function AdminProfile() {
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
             <div className="w-32 h-32 mx-auto rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 border-4 border-white dark:border-gray-800 shadow-md mb-4 flex items-center justify-center">
               {formData.avatarUrl ? (
-                <img src={formData.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                <img src={formData.avatarUrl} alt="Profile" className="w-full h-full object-contain p-1 bg-white" />
               ) : (
-                <User size={48} className="text-gray-400" />
+                <img src="/new_logo.png" alt="Admin Default" className="w-full h-full object-contain p-2" />
               )}
             </div>
             <h3 className="text-lg font-bold text-primary-900 dark:text-white">{user?.name}</h3>
@@ -169,7 +173,7 @@ export default function AdminProfile() {
               type="file" 
               ref={fileInputRef} 
               className="hidden" 
-              accept="image/*" 
+              accept="image/jpeg, image/png, image/webp" 
               onChange={handleFileChange} 
             />
           </div>
@@ -195,6 +199,15 @@ export default function AdminProfile() {
                   type="email"
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-gold-500 text-primary-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
                   className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-gold-500 text-primary-900 dark:text-white"
                 />
               </div>

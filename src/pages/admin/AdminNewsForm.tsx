@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Save, Upload, Plus, X, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Upload, Plus, X, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 import RichTextEditor from '../../components/admin/RichTextEditor';
 import { NewsPost, NewsCategory } from '../../types/news';
@@ -53,52 +53,49 @@ export default function AdminNewsForm({ initialData, onSave, onCancel, onDelete 
     }
   };
 
+  const [uploadingImages, setUploadingImages] = useState<{url: string}[]>([]);
+
   const addGalleryImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image is too large. Max 5MB allowed.');
+    
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Invalid file type. Please upload a JPG, PNG, or WEBP image.');
+      if (e.target) e.target.value = '';
       return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image is too large. Max 5MB allowed.');
+      if (e.target) e.target.value = '';
+      return;
+    }
+    
     const toastId = toast.loading('Uploading image...');
+    const previewUrl = URL.createObjectURL(file);
+    setUploadingImages(prev => [...prev, { url: previewUrl }]);
+
     try {
-      const { uploadImage } = await import('../../lib/firebase');
-      
-      // Compress
-      const compress = (f: File): Promise<File> => new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(f);
-        reader.onload = (event) => {
-          const img = new Image();
-          img.src = event.target?.result as string;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let w = img.width, h = img.height;
-            if (w > h && w > 1920) { h *= 1920 / w; w = 1920; }
-            else if (h > 1080) { w *= 1080 / h; h = 1080; }
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx?.drawImage(img, 0, 0, w, h);
-            canvas.toBlob(blob => {
-              resolve(blob ? new File([blob], f.name, { type: f.type }) : f);
-            }, f.type || 'image/jpeg', 0.85);
-          };
-        };
-      });
-      const compressed = await compress(file);
+      const { uploadImage, compressImage } = await import('../../lib/firebase');
+      const compressed = await compressImage(file);
       const url = await uploadImage(compressed, 'gallery');
 
-      setFormData({
-        ...formData,
-        gallery: [...(formData.gallery || []), url]
-      });
+      setFormData(prev => ({
+        ...prev,
+        gallery: [...(prev.gallery || []), url]
+      }));
       toast.success('Image added to gallery', { id: toastId });
-    } catch (err) {
-      toast.error('Failed to upload image', { id: toastId });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to upload image', { id: toastId });
+    } finally {
+      setUploadingImages(prev => prev.filter(p => p.url !== previewUrl));
+      URL.revokeObjectURL(previewUrl);
+      if (e.target) e.target.value = '';
     }
   };
 
-  const removeGalleryImage = (index: number) => {
+  const removeGalleryImage = async (index: number) => {
     const newGallery = [...(formData.gallery || [])];
     newGallery.splice(index, 1);
     setFormData({ ...formData, gallery: newGallery });
@@ -207,11 +204,11 @@ export default function AdminNewsForm({ initialData, onSave, onCancel, onDelete 
               <h3 className="text-lg font-bold text-primary-900 dark:text-white">Gallery Images (Optional)</h3>
               <label className="text-sm text-gold-600 hover:text-gold-700 font-medium flex items-center cursor-pointer">
                 <Plus size={16} className="mr-1" /> Add Image
-                <input type="file" className="hidden" accept="image/*" onChange={addGalleryImage} />
+                <input type="file" className="hidden" accept="image/jpeg, image/png, image/webp" onChange={addGalleryImage} />
               </label>
             </div>
             
-            {(!formData.gallery || formData.gallery.length === 0) ? (
+            {(!formData.gallery || formData.gallery.length === 0) && uploadingImages.length === 0 ? (
               <div className="text-center py-8 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl">
                 <ImageIcon className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                 <p className="text-sm text-gray-500 dark:text-gray-400">No additional images added.</p>
@@ -229,6 +226,14 @@ export default function AdminNewsForm({ initialData, onSave, onCancel, onDelete 
                       >
                         <Trash2 size={16} />
                       </button>
+                    </div>
+                  </div>
+                ))}
+                {uploadingImages.map((img, index) => (
+                  <div key={`upload-${index}`} className="relative group rounded-xl overflow-hidden aspect-video bg-gray-100 dark:bg-gray-900">
+                    <img src={img.url} alt="Uploading..." className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <Loader2 className="w-6 h-6 text-white animate-spin drop-shadow-md" />
                     </div>
                   </div>
                 ))}

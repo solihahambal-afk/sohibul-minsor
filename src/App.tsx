@@ -20,10 +20,13 @@ import AdminScholarships from './pages/admin/AdminScholarships';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import AdminHealth from './pages/admin/AdminHealth';
 import AdminSubscribers from './pages/admin/AdminSubscribers';
+import AdminGallery from './pages/admin/AdminGallery';
+import AdminSettings from './pages/admin/AdminSettings';
 import AdminMessages from './pages/admin/AdminMessages';
 import AdminProfile from './pages/admin/AdminProfile';
 import AdminUsers from './pages/admin/AdminUsers';
 import ResetPassword from './pages/ResetPassword';
+import LoadingScreen from './components/LoadingScreen';
 
 const SuperAdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAdminAuth();
@@ -36,7 +39,8 @@ const SuperAdminRoute = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   return (
     <AdminAuthProvider>
-      <BrowserRouter>
+      <LoadingScreen>
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
@@ -61,7 +65,7 @@ export default function App() {
             <Route path="scholarships" element={<AdminScholarships />} />
             <Route path="gallery" element={
               <SuperAdminRoute>
-                <div className="p-8">Gallery Management Coming Soon</div>
+                <AdminGallery />
               </SuperAdminRoute>
             } />
             <Route path="testimonials" element={<AdminTestimonials />} />
@@ -70,7 +74,7 @@ export default function App() {
             <Route path="messages" element={<AdminMessages />} />
             <Route path="settings" element={
               <SuperAdminRoute>
-                <div className="p-8">System Settings Coming Soon</div>
+                <AdminSettings />
               </SuperAdminRoute>
             } />
             <Route path="profile" element={<AdminProfile />} />
@@ -78,6 +82,7 @@ export default function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      </LoadingScreen>
     </AdminAuthProvider>
   );
 }

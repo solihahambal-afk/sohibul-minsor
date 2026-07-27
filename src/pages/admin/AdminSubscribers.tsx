@@ -19,31 +19,22 @@ export default function AdminSubscribers() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-  const fetchSubscribers = async () => {
     setIsLoading(true);
-
-    try {
-      const { data, error } = await apiClient
-        .from("subscribers")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      setSubscribers((data as Subscriber[]) || []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load subscribers");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  fetchSubscribers();
-}, []);
+    const unsubscribe = apiClient.from('subscribers').select('*')
+      .subscribe(({ data, error }) => {
+        setIsLoading(false);
+        if (error) {
+          console.error('Error fetching data:', error);
+          // toast.error('Database connection error');
+        } else if (data) {
+          setSubscribers([...data].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()));
+        }
+      });
+    return () => { if (unsubscribe) unsubscribe(); };
+  }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this subscriber?')) {
+    if (true) {
       if (true) {
         try {
           const { error } = await apiClient.from('subscribers').delete().eq('id', id);

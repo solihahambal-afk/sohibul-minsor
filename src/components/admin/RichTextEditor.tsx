@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { 
   Bold, Italic, Underline, List, ListOrdered, Link as LinkIcon, 
   Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, 
@@ -16,9 +17,48 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   // For this demo, we'll create a UI that looks like a rich text editor
   // but uses a standard textarea for simplicity and stability
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const handleAction = (action: string) => {
+    if (action === 'image') {
+      fileInputRef.current?.click();
+      return;
+    }
     // Simulate action
     console.log(`Rich text action triggered: ${action}`);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Invalid file type. Please upload a JPG, PNG, or WEBP image.');
+      if (e.target) e.target.value = '';
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image is too large. Max 5MB allowed.');
+      if (e.target) e.target.value = '';
+      return;
+    }
+
+    const toastId = toast.loading('Uploading image...');
+    try {
+      const { uploadImage, compressImage } = await import('../../lib/firebase');
+      const compressed = await compressImage(file);
+      const url = await uploadImage(compressed, 'editor-images');
+      
+      const imageMarkdown = `\n<img src="${url}" alt="Uploaded image" class="w-full rounded-xl my-4" />\n`;
+      onChange(value + imageMarkdown);
+      toast.success('Image inserted.', { id: toastId });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to upload image.', { id: toastId });
+    } finally {
+      if (e.target) e.target.value = '';
+    }
   };
 
   const ToolbarButton = ({ icon: Icon, action, title }: any) => (
@@ -74,6 +114,13 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || 'Write your article content here...'}
         className="w-full min-h-[300px] p-4 bg-transparent border-none focus:ring-0 resize-y text-primary-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+      />
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleImageUpload} 
+        accept="image/jpeg, image/png, image/webp" 
+        className="hidden" 
       />
       <div className="p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs text-gray-500 dark:text-gray-400 flex justify-between">
         <span>Rich Text Editor </span>

@@ -14,38 +14,48 @@ export default function Footer() {
     if (!email) return;
     
     const emailToSubscribe = email;
-    setEmail('');
-    setIsSubscribing(false);
-    toast.success('Subscription successful.');
-
-    // Background process to avoid blocking the user
+    setIsSubscribing(true);
+    
     try {
-      apiClient.from('subscribers').insert([
+      const { data: existingSubscribers } = await apiClient.from('subscribers').select('email').eq('email', emailToSubscribe).limit(1);
+      
+      if (existingSubscribers && existingSubscribers.length > 0) {
+        toast.error('Thank you, you have subscribed before');
+        setIsSubscribing(false);
+        return;
+      }
+      
+      const { error } = await apiClient.from('subscribers').insert([
         { 
           email: emailToSubscribe, 
           status: 'Active'
         }
-      ]).then(({ error }) => {
-        if (error) {
-          if (error.code === '23505' || error.message.includes('unique')) {
-            toast.error('This email is already subscribed.');
-          } else {
-             console.error('Subscription error:', error);
+      ]);
+      
+      if (error) {
+        if (error.code === '23505' || error.message?.includes('unique') || error.message?.includes('already exists')) {
+          toast.error('Thank you, you have subscribed before');
+        } else {
+           console.error('Subscription error:', error);
+           toast.error('Failed to subscribe. Please try again.');
+        }
+      } else {
+        toast.success('Subscription successful.');
+        setEmail('');
+        apiClient.functions.invoke("send-mail", {
+          body: {
+            type: "welcome",
+            payload: { email: emailToSubscribe }
           }
-        }
-      });
-      
-      apiClient.functions.invoke("send-mail", {
-        body: {
-          type: "welcome",
-          payload: { email: emailToSubscribe }
-        }
-      }).catch(emailErr => {
-        console.error('Welcome email error:', emailErr);
-      });
-      
+        }).catch(emailErr => {
+          console.error('Welcome email error:', emailErr);
+        });
+      }
     } catch (error: any) {
-      console.error('Background subscription error:', error);
+      console.error('Subscription error:', error);
+      toast.error('Failed to subscribe. Please try again.');
+    } finally {
+      setIsSubscribing(false);
     }
   };
 

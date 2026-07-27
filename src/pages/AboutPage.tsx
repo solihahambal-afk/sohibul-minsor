@@ -6,9 +6,9 @@ export default function AboutPage() {
   return (
     <div className="w-full bg-white">
       {/* Page Header */}
-      <PageHero
-        title="About Us"
-        subtitle="Sohibul Minsor Classic Ltd"
+      <PageHero 
+        title="About Us" 
+        subtitle="Sohibul Minsor Classic Ltd" 
       />
 
       {/* Company Overview */}
@@ -25,15 +25,15 @@ export default function AboutPage() {
             </h2>
             <div className="w-20 h-1.5 bg-gold-500 rounded-full"></div>
             <p className="text-gray-600 leading-relaxed text-lg">
-              Sohibul Minsor Classic Ltd (RC: 8411491) is a premier travel, tours, Hajj & Umrah, and educational
-              consultancy agency based in Ilorin, Kwara State, Nigeria. We specialize in
-              providing seamless, end-to-end travel solutions for individuals, students,
+              Sohibul Minsor Classic Ltd (RC: 8411491) is a premier travel, tours, Hajj & Umrah, and educational 
+              consultancy agency based in Ilorin, Kwara State, Nigeria. We specialize in 
+              providing seamless, end-to-end travel solutions for individuals, students, 
               and professionals looking to explore international opportunities.
             </p>
             <p className="text-gray-600 leading-relaxed text-lg">
-              With a deep understanding of complex immigration procedures, scholarship
-              acquisitions, and religious pilgrimages (Hajj & Umrah), our experienced
-              consultants work tirelessly to ensure your travel dreams become a reality.
+              With a deep understanding of complex immigration procedures, scholarship 
+              acquisitions, and religious pilgrimages (Hajj & Umrah), our experienced 
+              consultants work tirelessly to ensure your travel dreams become a reality. 
               We pride ourselves on transparency, integrity, and exceptional customer service.
             </p>
           </motion.div>
@@ -53,7 +53,7 @@ export default function AboutPage() {
       <section className="py-20 bg-gray-50 border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <motion.div
+            <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -64,13 +64,13 @@ export default function AboutPage() {
               </div>
               <h3 className="text-2xl font-bold text-primary-900 mb-4">Our Mission</h3>
               <p className="text-gray-600 leading-relaxed">
-                To provide reliable, transparent, and affordable travel, educational, and pilgrimage consultancy
-                services, empowering our clients to achieve their educational, professional,
+                To provide reliable, transparent, and affordable travel, educational, and pilgrimage consultancy 
+                services, empowering our clients to achieve their educational, professional, 
                 and spiritual travel goals with peace of mind.
               </p>
             </motion.div>
-
-            <motion.div
+            
+            <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -82,8 +82,8 @@ export default function AboutPage() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">Our Vision</h3>
               <p className="text-gray-300 leading-relaxed">
-                To be the most trusted and sought-after travel consultancy in Nigeria, recognized
-                for our exceptional success rates, customer-centric approach, and contribution
+                To be the most trusted and sought-after travel consultancy in Nigeria, recognized 
+                for our exceptional success rates, customer-centric approach, and contribution 
                 to global connectivity.
               </p>
             </motion.div>
@@ -98,7 +98,7 @@ export default function AboutPage() {
             Why Clients Trust Us
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <motion.div
+            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -110,8 +110,8 @@ export default function AboutPage() {
                 Legally registered as a corporate entity (RC: 8411491), ensuring your transactions are safe, legal, and thoroughly protected.
               </p>
             </motion.div>
-
-            <motion.div
+            
+            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -125,7 +125,7 @@ export default function AboutPage() {
               </p>
             </motion.div>
 
-            <motion.div
+            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

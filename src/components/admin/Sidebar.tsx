@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
+  Activity,
   LayoutDashboard, 
   FileText, 
   Briefcase, 
@@ -94,9 +95,9 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
               <div className="flex items-center">
                 <div className="h-10 w-10 rounded-full bg-primary-800 flex items-center justify-center border border-primary-700 overflow-hidden flex-shrink-0">
                   {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                    <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-contain p-1 bg-white" />
                   ) : (
-                    <UserCircle className="h-6 w-6 text-gold-500" />
+                    <img src="/new_logo.png" alt="Admin Default" className="w-full h-full object-contain p-1" />
                   )}
                 </div>
                 <div className="ml-3 truncate">

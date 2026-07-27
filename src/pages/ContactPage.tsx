@@ -122,12 +122,6 @@ export default function ContactPage() {
                   <a href="mailto:info@sohibulminsorclassic.com" className="text-gray-600 text-sm leading-relaxed hover:text-gold-600 break-all flex items-center">
                     info@sohibulminsorclassic.com
                   </a>
-                  <a href="mailto:admin@sohibulminsorclassic.com" className="text-gray-600 text-sm leading-relaxed hover:text-gold-600 break-all flex items-center">
-                    admin@sohibulminsorclassic.com
-                  </a>
-                  <a href="mailto:support@sohibulminsorclassic.com" className="text-gray-600 text-sm leading-relaxed hover:text-gold-600 break-all flex items-center">
-                    support@sohibulminsorclassic.com
-                  </a>
                 </div>
               </div>
             </div>

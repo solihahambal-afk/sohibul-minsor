@@ -24,14 +24,14 @@ export default function AdminNews() {
 
   useEffect(() => {
     setIsLoading(true);
-    const unsubscribe = apiClient.from('news').select('*').order('datePublished', { ascending: false })
+    const unsubscribe = apiClient.from('news').select('*')
       .subscribe(({ data, error }) => {
         setIsLoading(false);
         if (error) {
           console.error('Error fetching data:', error);
           // toast.error('Database connection error');
         } else if (data) {
-          setPosts(data);
+          setPosts([...data].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()));
         }
       });
     return () => { if (unsubscribe) unsubscribe(); };
@@ -56,7 +56,20 @@ export default function AdminNews() {
   );
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this article? This action cannot be undone.')) {
+    if (true) {
+      const postToDelete = posts.find(p => p.id === id);
+      try {
+        const { deleteImage } = await import('../../lib/firebase');
+        if (postToDelete?.featuredImage) {
+          await deleteImage(postToDelete.featuredImage);
+        }
+        if (postToDelete?.gallery && Array.isArray(postToDelete.gallery)) {
+          for (const imgUrl of postToDelete.gallery) {
+            await deleteImage(imgUrl);
+          }
+        }
+      } catch (err) { console.error('Failed to delete images', err); }
+      
       if (true) {
         try {
           const { error } = await apiClient.from('news').delete().eq('id', id);
